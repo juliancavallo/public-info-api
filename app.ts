@@ -16,3 +16,5 @@ app.use(projectRoutes);
 const httpServer = http.createServer(app);
 const PORT: any = process.env.PORT ?? 3000;
 httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
+
+module.exports = app;
