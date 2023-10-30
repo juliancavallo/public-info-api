@@ -1,9 +1,8 @@
 /** source/server.ts */
 import http from 'http';
 import express, { Express } from 'express';
-import morgan from 'morgan';
-import indexRoutes from './routes/index';
-import projectRoutes from './routes/projects';
+import indexRoutes from './src/routes/index';
+import projectRoutes from './src/routes/projects';
 
 const app: Express = express();
 
