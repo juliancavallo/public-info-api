@@ -66,13 +66,16 @@ interface IGetAllQuery{
 }
 
 const getAll = async (req: Request<{},{},{}, IGetAllQuery >, res: Response) => {
-    req.query.size = (req.query.size === 0 || req.query.size == null) ? 10 : req.query.size;
 
+    req.query.size = req.query.size || 10;
     req.query.size = Math.min(req.query.size, 50);
+
+    req.query.page = req.query.page || 0;
     req.query.page = Math.max(req.query.page, 1);
-    req.query.sord = req.query.sord.trim() === "" ? "asc" : req.query.sord;
-    req.query.sidx = req.query.sidx.trim() === "" ? "project" : req.query.sidx;
-    
+
+    req.query.sord = req.query.sord || "asc";
+    req.query.sidx = req.query.sidx || "project";
+
     let response: AxiosResponse<IApiResponse> = await axios.get(`https://datos.gob.ar/api/3/action/package_show?id=obras-mapa-inversiones-argentina`);
 
     const url = response.data.result.resources[1].url;
