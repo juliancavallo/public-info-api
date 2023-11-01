@@ -79,11 +79,12 @@ const getAll = async (req: Request<{},{},{}, IGetAllQuery >, res: Response) => {
 
     try{
         response = await axios.get(
-            `https://datos.gob.ar/api/3/action/package_show?id=obras-mapa-inversiones-argentina`,
+            `http://datos.gob.ar/api/3/action/package_show?id=obras-mapa-inversiones-argentina`,
             {
                 headers:{
                     "Access-Control-Allow-Origin": "*",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    'User-Agent': 'YourApp/1.0'
                 }
             });
     } catch( err){
