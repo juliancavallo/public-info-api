@@ -75,17 +75,22 @@ const getAll = async (req: Request<{},{},{}, IGetAllQuery >, res: Response) => {
 
     req.query.sord = req.query.sord || "asc";
     req.query.sidx = req.query.sidx || "project";
+    let response: AxiosResponse<IApiResponse> | null = null;
 
-    let response: AxiosResponse<IApiResponse> = await axios.get(
-        `https://datos.gob.ar/api/3/action/package_show?id=obras-mapa-inversiones-argentina`,
-        {
-            headers:{
-                "Access-Control-Allow-Origin": "*",
-            }
-        });
+    try{
+        response = await axios.get(
+            `https://datos.gob.ar/api/3/action/package_show?id=obras-mapa-inversiones-argentina`,
+            {
+                headers:{
+                    "Access-Control-Allow-Origin": "*",
+                }
+            });
+    } catch( err){
+        console.log("error al llamar a la api de terceros: " + err);
+    }
 
-    const url = response.data.result.resources[1].url;
-    console.log(url);
+    const url = response?.data.result.resources[1].url;
+    console.log("url: " + url);
 
     let projects: Array<IProject> = [];
     
