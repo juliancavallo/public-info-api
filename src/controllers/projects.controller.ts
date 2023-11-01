@@ -80,7 +80,7 @@ const getAll = async (req: Request<{},{},{}, IGetAllQuery >, res: Response) => {
 
     const url = response.data.result.resources[1].url;
 
-    let projects: Array<IProject> = await getJsonFromCsv(url);
+    let projects: Array<IProject> = [];
     
     return res.status(200).json({
         message: projects
