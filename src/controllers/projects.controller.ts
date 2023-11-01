@@ -75,26 +75,19 @@ const getAll = async (req: Request<{},{},{}, IGetAllQuery >, res: Response) => {
 
     req.query.sord = req.query.sord || "asc";
     req.query.sidx = req.query.sidx || "project";
-    let response: AxiosResponse<IApiResponse> | null = null;
+    let response: AxiosResponse<IApiResponse> = await axios.get(
+        `http://datos.gob.ar/api/3/action/package_show?id=obras-mapa-inversiones-argentina`,
+        {
+            headers:{
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                'User-Agent': 'PublicInfoAPI/1.0'
+            }
+        });
 
-    try{
-        response = await axios.get(
-            `http://datos.gob.ar/api/3/action/package_show?id=obras-mapa-inversiones-argentina`,
-            {
-                headers:{
-                    "Access-Control-Allow-Origin": "*",
-                    "Content-Type": "application/json",
-                    'User-Agent': 'YourApp/1.0'
-                }
-            });
-    } catch( err){
-        console.log("Error al llamar a datos.gob.ar/api - " + err);
-    }
+    const url = response.data.result.resources[1].url;
 
-    const url = response?.data.result.resources[1].url;
-    console.log("url: " + url);
-
-    let projects: Array<IProject> = [];
+    let projects: Array<IProject> = await getJsonFromCsv(url);
     
     return res.status(200).json({
         message: projects
