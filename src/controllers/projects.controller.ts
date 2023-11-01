@@ -104,6 +104,8 @@ const getJsonFromCsv = async (csvFilePath: string): Promise<Array<IProject>> => 
                 projects.push(json);
             });
 
+        console.error('CSV procesado con exito');
+
         return projects;
     } catch (err) {
         console.error('Error al convertir CSV a JSON:', err);
