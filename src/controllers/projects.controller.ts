@@ -83,10 +83,11 @@ const getAll = async (req: Request<{},{},{}, IGetAllQuery >, res: Response) => {
             {
                 headers:{
                     "Access-Control-Allow-Origin": "*",
+                    "Content-Type": "application/json"
                 }
             });
     } catch( err){
-        console.log("error al llamar a la api de terceros: " + err);
+        console.log("Error al llamar a datos.gob.ar/api - " + err);
     }
 
     const url = response?.data.result.resources[1].url;
