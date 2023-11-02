@@ -1,16 +1,6 @@
 import { IGetAllQuery, IProjectCsvRecord, IProjectResponse, IProjectResponseDetail, IProjectResponseHeader, IProjectResponseItem } from '../contracts/project.contracts';
-import csvService from '../services/projectCSV.service'
-
-const parseCurrencyValueToString = (value: string): string => {
-    value = value.replace('.', ',');
-    const valueWithoutDecimals = parseFloat(value.split(',')[0]);
-    const valueOnCurrencyFormat = valueWithoutDecimals.toLocaleString('es-AR', {
-      style: 'currency',
-      currency: 'ARS'
-    });
-  
-    return valueOnCurrencyFormat.replace(/0+$/, '').replace(/,$/, '');
-}
+import { normalize, parseCurrencyValueToString } from '../hepers/string-helper';
+import csvService from './project-csv.service'
 
 const convertCsvRecordsToResponse = (csvRecords: IProjectCsvRecord[]) : IProjectResponseItem[] => {
     const projects: IProjectResponseItem[] = [];
@@ -44,10 +34,26 @@ const convertCsvRecordsToResponse = (csvRecords: IProjectCsvRecord[]) : IProject
     return projects;
 }
 
-export const getAll = async(query: IGetAllQuery): Promise<IProjectResponse> => {
-    
+export const getAll = async(query: IGetAllQuery): Promise<IProjectResponse> => { 
     const url = await csvService.getCsvUrl();
-    const csvRecords = await csvService.getJsonFromCsv(url);
+    let csvRecords = await csvService.getJsonFromCsv(url);
+
+    if (query.province)
+        csvRecords = csvRecords.filter(x => normalize(x.nombreprovincia).includes(normalize(query.province ?? '')));
+
+    if (query.department)
+        csvRecords = csvRecords.filter(x => normalize(x.nombredepto).includes(normalize(query.department ?? '')));
+
+    if (query.totalAmountMin)
+        csvRecords = csvRecords.filter(x => parseFloat(x.montototal) >= (query.totalAmountMin ?? 0));
+
+    if (query.totalAmountMax)
+        csvRecords = csvRecords.filter(x => parseFloat(x.montototal) <= (query.totalAmountMax ?? 0));
+
+    if (query.description)
+        csvRecords = csvRecords.filter(x => 
+            normalize(x.descripicionfisica).includes(normalize(query.description ?? '')) 
+        || normalize(x.nombreobra).includes(normalize(query.description ?? '')));
 
     const projects = convertCsvRecordsToResponse(csvRecords);
 
