@@ -88,3 +88,10 @@ export interface IGetAllQuery{
     totalAmountMax?: number;
     description?: string;
 }
+
+export class ProjectSidx {
+    public static PROJECT: string = "project";
+    public static TOTAL_AMOUNT: string = "totalAmount";
+    public static PROVINCE: string = "province";
+    public static DEPARTMENT: string = "department";
+  }

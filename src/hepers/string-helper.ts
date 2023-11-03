@@ -15,3 +15,7 @@ export const parseCurrencyValueToString = (value: string): string => {
   
     return valueOnCurrencyFormat.replace(/0+$/, '').replace(/,$/, '');
 }
+
+export const convertYearToDate = (year: string): Date => {
+    return new Date(parseInt(year), 0, 1);
+}

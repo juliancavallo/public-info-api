@@ -1,5 +1,5 @@
-import { IGetAllQuery, IProjectCsvRecord, IProjectResponse, IProjectResponseDetail, IProjectResponseHeader, IProjectResponseItem } from '../contracts/project.contracts';
-import { normalize, parseCurrencyValueToString } from '../hepers/string-helper';
+import { IGetAllQuery, IProjectCsvRecord, IProjectResponse, IProjectResponseDetail, IProjectResponseHeader, IProjectResponseItem, ProjectSidx } from '../contracts/project.contracts';
+import { normalize, parseCurrencyValueToString, convertYearToDate } from '../hepers/string-helper';
 import csvService from './project-csv.service'
 
 const convertCsvRecordsToResponse = (csvRecords: IProjectCsvRecord[]) : IProjectResponseItem[] => {
@@ -34,6 +34,47 @@ const convertCsvRecordsToResponse = (csvRecords: IProjectCsvRecord[]) : IProject
     return projects;
 }
 
+const sort = (sidx: string, sord: string, list: IProjectResponseItem[]): IProjectResponseItem[] =>{
+    let result: IProjectResponseItem[];
+
+    switch(sidx){
+        case ProjectSidx.PROJECT:
+            result = sord === 'asc'
+              ? list.sort((a, b) => a.header.projectName.localeCompare(b.header.projectName))
+              : list.sort((a, b) => b.header.projectName.localeCompare(a.header.projectName));
+            break;
+      
+          case ProjectSidx.TOTAL_AMOUNT:
+            result = sord === 'asc'
+              ? list.sort((a, b) => {
+                const amountA = parseFloat(a.header.totalAmount.replace('$', '').replace('.', '').trim());
+                const amountB = parseFloat(b.header.totalAmount.replace('$', '').replace('.', '').trim());
+                return amountA - amountB;
+              })
+              : list.sort((a, b) => {
+                const amountA = parseFloat(a.header.totalAmount.replace('$', '').replace('.', '').trim());
+                const amountB = parseFloat(b.header.totalAmount.replace('$', '').replace('.', '').trim());
+                return amountB - amountA;
+              });
+            break;
+      
+          case ProjectSidx.DEPARTMENT:
+            result = sord === 'asc'
+              ? list.sort((a, b) => a.header.department.localeCompare(b.header.department))
+              : list.sort((a, b) => b.header.department.localeCompare(a.header.department));
+            break;
+      
+          case ProjectSidx.PROVINCE:
+          default:
+            result = sord === 'asc'
+              ? list.sort((a, b) => a.header.province.localeCompare(b.header.province))
+              : list.sort((a, b) => b.header.province.localeCompare(a.header.province));
+            break;
+    }
+
+    return result;
+}
+
 export const getAll = async(query: IGetAllQuery): Promise<IProjectResponse> => { 
     const url = await csvService.getCsvUrl();
     let csvRecords = await csvService.getJsonFromCsv(url);
@@ -50,6 +91,12 @@ export const getAll = async(query: IGetAllQuery): Promise<IProjectResponse> => {
     if (query.totalAmountMax)
         csvRecords = csvRecords.filter(x => parseFloat(x.montototal) <= (query.totalAmountMax ?? 0));
 
+    if(query.fromDate)
+        csvRecords = csvRecords.filter(x => convertYearToDate(x.fechainicioanio) >= (query.fromDate ?? new Date()));
+
+    if (query.toDate)
+        csvRecords = csvRecords.filter(x => convertYearToDate(x.fechafinanio) <= (query.toDate ?? new Date()));
+
     if (query.description)
         csvRecords = csvRecords.filter(x => 
             normalize(x.descripicionfisica).includes(normalize(query.description ?? '')) 
@@ -60,12 +107,11 @@ export const getAll = async(query: IGetAllQuery): Promise<IProjectResponse> => {
     const pagesCount = Math.ceil(projects.length / query.size);
 
     return {
-        items: projects
+        items: sort(query.sidx, query.sord, projects)            
             .slice((Math.min(query.page, pagesCount) - 1) * query.size)
             .slice(0, query.size),
         pages: pagesCount
     };
 }
-
 
 export default {getAll}
