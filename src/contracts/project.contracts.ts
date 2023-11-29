@@ -90,7 +90,7 @@ export interface IGetAllQuery{
 }
 
 export class ProjectSidx {
-    public static PROJECT: string = "project";
+    public static PROJECT: string = "projectName";
     public static TOTAL_AMOUNT: string = "totalAmount";
     public static PROVINCE: string = "province";
     public static DEPARTMENT: string = "department";
